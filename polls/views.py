@@ -45,14 +45,7 @@ def questionCreation(request):
     if request.method == "POST":
         form = QuestionCreationForm(request.POST)
         if form.is_valid() and request.user.username == 'girish':
-            question_text = form.cleaned_data['question_text']
-            choice1 = form.cleaned_data['choice1']
-            choice2 = form.cleaned_data['choice2']
-
-            question = Question.objects.create(question_text=question_text)
-            Choice.objects.create(question=question, choice_text=choice1)
-            Choice.objects.create(question=question, choice_text=choice2)
-
+            form.save()
             return redirect("polls:index")
         else:
             return redirect("polls:index")
