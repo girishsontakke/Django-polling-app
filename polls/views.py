@@ -3,6 +3,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.views import generic
+from django.contrib.auth.models import User
 
 from .models import Question, Choice
 from .forms import QuestionCreationForm
@@ -44,7 +45,7 @@ def vote(request, question_id):
 def questionCreation(request):
     if request.method == "POST":
         form = QuestionCreationForm(request.POST)
-        if form.is_valid() and request.user.username == 'girish':
+        if form.is_valid() and request.user.is_staff:
             form.save()
             return redirect("polls:index")
         else:
