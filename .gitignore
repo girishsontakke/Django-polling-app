@@ -4,6 +4,10 @@ All gists
 Back to GitHub
 @girishsontakke
 
+# ide
+*.gitignore
+*.idea/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
