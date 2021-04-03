@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import widgets
-from .models import Question, Choice
+from .models import Question, Choice, User
 
 
 class QuestionCreationForm(forms.Form):
@@ -21,3 +21,10 @@ class QuestionCreationForm(forms.Form):
         question = Question.objects.create(question_text=question_text)
         Choice.objects.create(question=question, choice_text=choice1)
         Choice.objects.create(question=question, choice_text=choice2)
+
+
+class LoginForm(forms.Form):
+    username = forms.CharField(max_length=100, widget=widgets.TextInput(
+        attrs={'placeholder': 'Enter your username'}))
+    password = forms.CharField(max_length=100, widget=widgets.PasswordInput(
+        attrs={'placeholder': 'Enter your username'}))

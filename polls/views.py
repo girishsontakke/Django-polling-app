@@ -1,12 +1,14 @@
-from django.db.models import F
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.views import generic
 from django.contrib import messages
+from django.contrib.auth.hashers import check_password
+from django.contrib.auth import login, logout
 
-from .models import Question, Choice
-from .forms import QuestionCreationForm
+from .models import Question, Choice, User
+from .forms import LoginForm, QuestionCreationForm
+from .decorators import no_user_required
 
 
 class IndexView(generic.ListView):
@@ -14,7 +16,7 @@ class IndexView(generic.ListView):
     context_object_name = "latest_question_list"
 
     def get_queryset(self):
-        return Question.objects.order_by("-pub_date")[:5]
+        return Question.objects.order_by("-pub_date")
 
 
 class DetailView(generic.DetailView):
@@ -37,7 +39,7 @@ def vote(request, question_id):
             'question': question,
         })
     else:
-        selected_choice.votes = F('votes') + 1
+        selected_choice.votes.add(request.user)
         selected_choice.save()
         return HttpResponseRedirect(reverse("polls:results", args=(question.id,)))
 
@@ -55,3 +57,29 @@ def questionCreation(request):
         form = QuestionCreationForm()
 
     return render(request, "polls/question_form.html", {"form": form})
+
+
+@no_user_required
+def loginView(request):
+    if request.method == "POST":
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get("username", "")
+            password = form.cleaned_data.get("password", "")
+            user = get_object_or_404(User, username=username)
+            if check_password(password, user.password):
+                login(request, user)
+                messages.success(
+                    request, f"successfully login {user.username}")
+                return redirect("polls:index")
+            messages.warning(request, "please check your credentials")
+            return render(request, 'registration/login.html', {"form": form})
+        messages.warning(request, "please check your credentials")
+        return render(request, 'registration/login.html', {"form": form})
+    form = LoginForm()
+    return render(request, 'registration/login.html', {"form": form})
+
+
+def logoutView(request):
+    logout(request)
+    return redirect("login")
